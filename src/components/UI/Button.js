@@ -5,14 +5,9 @@ import { styles } from '../../values/styles/textBox'
 
 export const Button = (props) => {
 
-    function navigate() {
-        props?.status
-            ? props.navigation.navigate(props.children, { status: props.status })
-            : props.navigation.navigate(props.children)
-    }
 
     return (
-        <TouchableOpacity style={{ height: 50, width: "90%" }} onPress={navigate}>
+        <TouchableOpacity style={{ height: 50, width: "90%" }} onPress={props.onPress}>
             <View>
                 <Text style={{ ...styles.text }}>{props.children}</Text>
             </View>
