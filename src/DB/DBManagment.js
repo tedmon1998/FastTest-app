@@ -1,5 +1,39 @@
+// дает вашему приложению доступ к базе данных
 import * as SQLite from 'expo-sqlite'
+// обеспечивает доступ к файловой системе, хранящейся локально на устройстве
 import * as FileSystem from 'expo-file-system'
+// обеспечивает интерфейс к системе ресурсов
+import { Asset } from 'expo-asset'
+
+// функция которая проверяет и в случая отсутствия БД, загружает его и выводит его содержимое
+export async function openDatabaseAndCreate() {
+    // имя нашего БД (которое будет после го загрузки (создания))
+    const dbName = 'testDB.sqlite'
+    // путь, где будут храниться БД приложения
+    const sqlDir = FileSystem.documentDirectory + "SQLite/"
+    // проверка существует БД или нет (exists выводит булевый результат)
+    if (!(await FileSystem.getInfoAsync(sqlDir + dbName)).exists) {
+        // создаем директорию при его отсутствии, intermediates указывает на то, что
+        // если нет родительского каталога (SQLite), чтобы его так же создал 
+        await FileSystem.makeDirectoryAsync(sqlDir, { intermediates: true })
+        // получаем экземпляр, предстовляющий ресурс с учетом его модуля
+        const asset = Asset.fromModule(require('../../assets/database/testDB.sqlite'))
+        // загружаем данные в локальный файл (в каталге кеша ус-ва)
+        await FileSystem.downloadAsync(asset.uri, sqlDir + dbName).then(({ url }) => console.log(`finish download: ${url}`)).catch(error => console.log(`download ${error}`))
+    }
+    //  открываем соединение с сервером
+    const db = await SQLite.openDatabase(dbName)
+    // выполняем транзакцию в БД
+    db.transaction(tx => {
+        // выполненям непосредственно сам запрос в БД (вывод всей таблицы),
+        // [] - говорит о том, что мы ничего туда не передаем 
+        tx.executeSql(
+            'SELECT * FROM allData', [],
+            (_, { rows }) => console.log(JSON.stringify(rows))
+        )
+        // обработка исключения
+    }), error => console.log(`select error: ${error}`);
+}
 
 
 export const checkExistenceDB = async (dbName) => {
@@ -25,9 +59,11 @@ export async function createDatabase(dbName) {
 
 export async function select(dbName) {
     const db = SQLite.openDatabase(dbName)
+    console.log(JSON.stringify(db));
     db.transaction(tx => {
+        console.log(JSON.stringify(tx));
         tx.executeSql(
-            'SELECT * FROM mytest',
+            'SELECT * FROM allData',
             [],
             (_, { rows }) => {
                 console.log(JSON.stringify(rows));

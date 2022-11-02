@@ -7,7 +7,7 @@ module.exports = function (api) {
             [
                 "module-resolver",
                 {
-                    extensions: [".txs", ".ts", ".js", ".json", ".gif"]
+                    extensions: [".txs", ".ts", ".js", ".json", ".gif", '.db', '.sqlite']
                 }
             ]
         ],
