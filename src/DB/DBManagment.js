@@ -7,34 +7,39 @@ import { Asset } from 'expo-asset'
 
 // функция которая проверяет и в случая отсутствия БД, загружает его и выводит его содержимое
 export async function openDatabaseAndCreate() {
-    // имя нашего БД (которое будет после го загрузки (создания))
-    const dbName = 'testDB.sqlite'
+    // имя нашего БД (которое будет после загрузки (создания))
+    const dbName = "testDBa.sqlite";
     // путь, где будут храниться БД приложения
-    const sqlDir = FileSystem.documentDirectory + "SQLite/"
+    const sqlDir = FileSystem.documentDirectory + "SQLite/";
     // проверка существует БД или нет (exists выводит булевый результат)
     if (!(await FileSystem.getInfoAsync(sqlDir + dbName)).exists) {
         // создаем директорию при его отсутствии, intermediates указывает на то, что
         // если нет родительского каталога (SQLite), чтобы его так же создал 
-        await FileSystem.makeDirectoryAsync(sqlDir, { intermediates: true })
+        await FileSystem.makeDirectoryAsync(sqlDir, { intermediates: true });
         // получаем экземпляр, предстовляющий ресурс с учетом его модуля
-        const asset = Asset.fromModule(require('../../assets/database/testDB.sqlite'))
+        const asset = Asset.fromModule(require("../../assets/database/testDBa.sqlite"));
         // загружаем данные в локальный файл (в каталге кеша ус-ва)
-        await FileSystem.downloadAsync(asset.uri, sqlDir + dbName).then(({ url }) => console.log(`finish download: ${url}`)).catch(error => console.log(`download ${error}`))
+        // в asset.uri путь на вашем ус-ве, а в uri путь внутри смартфона
+        await FileSystem.downloadAsync(asset.uri, sqlDir + dbName).then(({ uri }) => console.log(`finish download: ${uri}`)).catch(error => console.log(`download ${error}`));
     }
-    //  открываем соединение с сервером
-    const db = await SQLite.openDatabase(dbName)
-    // выполняем транзакцию в БД
-    db.transaction(tx => {
-        // выполненям непосредственно сам запрос в БД (вывод всей таблицы),
-        // [] - говорит о том, что мы ничего туда не передаем 
-        tx.executeSql(
-            'SELECT * FROM allData', [],
-            (_, { rows }) => console.log(JSON.stringify(rows))
-        )
-        // обработка исключения
-    }), error => console.log(`select error: ${error}`);
 }
 
+export async function getRows(dbName) {
+    return new Promise(success => {
+        //  открываем соединение с БД
+        const db = SQLite.openDatabase(dbName);
+        // выполняем транзакцию в БД
+        db.transaction(tx => {
+            // выполненям непосредственно сам запрос в БД (вывод всей таблицы),
+            // [] - говорит о том, что мы ничего туда не передаем 
+            tx.executeSql(
+                'SELECT * FROM allData',
+                [],
+                (_, { rows }) => success(rows._array))
+            // обработка исключения
+        }), error => console.log(`select error: ${error}`);
+    })
+}
 
 export const checkExistenceDB = async (dbName) => {
     const dbDir = FileSystem.documentDirectory + 'SQLite/'
@@ -63,7 +68,7 @@ export async function select(dbName) {
     db.transaction(tx => {
         console.log(JSON.stringify(tx));
         tx.executeSql(
-            'SELECT * FROM allData',
+            'SELECT * FROM mytest',
             [],
             (_, { rows }) => {
                 console.log(JSON.stringify(rows));

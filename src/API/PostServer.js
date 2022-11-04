@@ -21,4 +21,20 @@ export default class PostServer {
         const response = await axios.get('https://jsonplaceholder.typicode.com/posts', { params: { _limit: 5, _page: page } })
         return response
     }
+
+    static getDirectory = async () => {
+        const response = await axios.get('http://xxxxxx2w.beget.tech/api/get_data')
+        return response.data
+    }
+
+    static addUser = async (name, phone) => {
+        const response = await axios.post('http://xxxxxx2w.beget.tech/api/add_data', { data: { name, phone } })
+        return response.data
+    }
+
+    static delUser = async (id) => {
+        const response = await axios.post('http://xxxxxx2w.beget.tech/api/del_data', { data: { id } })
+        return response.data
+    }
+
 }
